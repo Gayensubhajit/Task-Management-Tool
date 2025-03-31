@@ -11,4 +11,4 @@ clean:
 	rm -f $(EXECUTABLE)
 	rm -f *.o
 
-.PHONY: all clean 
+.PHONY: all clean

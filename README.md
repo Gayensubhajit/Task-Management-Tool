@@ -30,6 +30,11 @@ Also contrubuted Chirantan Biswas , Gunjan Basak
 - C compiler (GCC recommended)
 - Git (optional, for version control features)
 
+### Easiest Method (Windows)
+1. Double-click "taskmanager.exe" file
+2. This will automatically run the pre-compiled executable with all dependencies
+
+
 ## Building
 
 To compile the applications:

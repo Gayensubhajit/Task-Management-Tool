@@ -2,8 +2,12 @@
 
 A command-line task management tool written in C that allows users to add, edit, complete, and delete tasks. The tool includes version control using Git to track task changes and provide task history.
 
-## created 
-created by subhajit
+## Creator
+Created by: Subhajit Gayen
+Student Developer
+Contact: subhajitgayen43@gmail.com
+GitHub: https://github.com/silentbyte1
+Also contrubuted Chirantan Biswas , Gunjan Basak
 
 ## Features
 
@@ -12,29 +16,44 @@ created by subhajit
 - Automatic Git integration for version control
 - View task history (all changes made to a specific task)
 - Efficient database-style storage in .db file
+- Standalone database viewer tool
+
+## Included Files
+
+- `task_manager.c` - Source code for the main task management application
+- `init-db.c` - Source code for the database viewer utility
+- `tasks.db` - Binary database file containing all tasks
+- `Makefile` - Build script (optional)
 
 ## Requirements
 
 - C compiler (GCC recommended)
-- Git
-- Make (optional, for using the Makefile)
+- Git (optional, for version control features)
 
 ## Building
 
-To build the project:
+To compile the applications:
 
+```bash
+# Compile the main task manager
+gcc -o task_manager task_manager.c
+
+# Compile the database viewer
+gcc -o view_binary_db init-db.c
 ```
+
+Or if you have Make installed:
+
+```bash
 make
 ```
 
-This will create an executable called `taskman`.
+## Using the Task Manager
 
-## Usage
+Run the main task management program:
 
-Run the program:
-
-```
-./taskman
+```bash
+./task_manager
 ```
 
 ### Available Commands
@@ -84,6 +103,21 @@ e4f5g6h 2023-08-10 Add task: Research new technologies
 Task 1 deleted.
 ```
 
+## Using the Database Viewer
+
+The database viewer is a standalone utility to view the contents of the tasks.db file:
+
+```bash
+./view_binary_db
+```
+
+This will display all tasks in the database in a tabular format, showing:
+- Task ID
+- Description
+- Status (Pending/Completed)
+- Creation time
+- Last modified time
+
 ## Data Storage
 
 The tasks are stored in a binary database file named `tasks.db` in the same directory as the executable. Each modification to the tasks is committed to Git with an appropriate message.
@@ -98,6 +132,14 @@ The database file uses a simple binary format:
   - 4 bytes: completed flag (0 or 1)
   - 8 bytes: creation timestamp
   - 8 bytes: last modified timestamp
+
+## Sharing and Distribution
+
+When sharing this project with others:
+
+1. Include all source files (`task_manager.c` and `init-db.c`)
+2. Include the database file (`tasks.db`) if you want to share your existing tasks
+3. Recipients can compile the programs on their machine and run them
 
 ## License
 

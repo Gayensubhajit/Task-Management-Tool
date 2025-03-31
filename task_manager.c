@@ -3,10 +3,11 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <direct.h> // For _getcwd on Windows
 
 #define MAX_TASK_DESC 256
 #define MAX_TASKS 100
-#define TASKS_FILE "tasks.dat"
+#define DB_FILE "tasks.db"
 #define GIT_DIR ".git"
 
 // Custom strdup implementation
@@ -30,9 +31,37 @@ typedef struct {
 Task tasks[MAX_TASKS];
 int task_count = 0;
 
+// GitSupportEnabled flag to disable Git functionality if not available
+int git_support_enabled = 0;
+
+int check_git_available() {
+    // Just try using the git command directly - it will work if git is in the PATH
+    if (system("git --version >nul 2>&1") == 0) {
+        return 1;
+    }
+    return 0;
+}
+
 void init_git_repo() {
+    // Check if git is available
+    git_support_enabled = check_git_available();
+    
+    if (!git_support_enabled) {
+        printf("Git is not available. Version control features will be disabled.\n");
+        return;
+    }
+    
+    // Configure git to allow safe directory - do this first
+    char cwd[512];
+    _getcwd(cwd, sizeof(cwd));
+    char config_cmd[512];
+    sprintf(config_cmd, "git config --global --add safe.directory \"%s\"", cwd);
+    system(config_cmd);
+    
     if (access(GIT_DIR, F_OK) != 0) {
         printf("Initializing git repository...\n");
+        
+        // Initialize git repo
         system("git init");
         
         // Create .gitignore
@@ -49,32 +78,84 @@ void init_git_repo() {
 }
 
 void commit_changes(const char *message) {
+    if (!git_support_enabled) return;
+    
     char cmd[512];
-    sprintf(cmd, "git add %s && git commit -m \"%s\"", TASKS_FILE, message);
+    sprintf(cmd, "git add \"%s\"", DB_FILE);
+    system(cmd);
+    
+    sprintf(cmd, "git commit -m \"%s\"", message);
     system(cmd);
 }
 
+/*
+ * DB FORMAT:
+ * - First 4 bytes: Integer with number of tasks
+ * - For each task:
+ *   - 4 bytes: task ID
+ *   - 256 bytes: description (fixed size, null-padded)
+ *   - 4 bytes: completed flag (0 or 1)
+ *   - 8 bytes: created_time (time_t)
+ *   - 8 bytes: modified_time (time_t)
+ */
+
 int save_tasks() {
-    FILE *file = fopen(TASKS_FILE, "wb");
+    FILE *file = fopen(DB_FILE, "wb");
     if (!file) {
-        printf("Error: Could not open file for writing.\n");
+        printf("Error: Could not open database file for writing.\n");
         return 0;
     }
     
+    // Write header with task count
     fwrite(&task_count, sizeof(int), 1, file);
-    fwrite(tasks, sizeof(Task), task_count, file);
+    
+    // Write each task
+    for (int i = 0; i < task_count; i++) {
+        fwrite(&tasks[i].id, sizeof(int), 1, file);
+        fwrite(tasks[i].description, sizeof(char), MAX_TASK_DESC, file);
+        fwrite(&tasks[i].completed, sizeof(int), 1, file);
+        fwrite(&tasks[i].created_time, sizeof(time_t), 1, file);
+        fwrite(&tasks[i].modified_time, sizeof(time_t), 1, file);
+    }
+    
     fclose(file);
     return 1;
 }
 
 int load_tasks() {
-    FILE *file = fopen(TASKS_FILE, "rb");
+    FILE *file = fopen(DB_FILE, "rb");
     if (!file) {
+        // It's okay if the file doesn't exist yet
         return 0;
     }
     
-    fread(&task_count, sizeof(int), 1, file);
-    fread(tasks, sizeof(Task), task_count, file);
+    // Read task count from header
+    if (fread(&task_count, sizeof(int), 1, file) != 1) {
+        fclose(file);
+        return 0;
+    }
+    
+    // Check if task count seems valid
+    if (task_count < 0 || task_count > MAX_TASKS) {
+        printf("Error: Database file appears to be corrupted.\n");
+        fclose(file);
+        return 0;
+    }
+    
+    // Read each task
+    for (int i = 0; i < task_count; i++) {
+        if (fread(&tasks[i].id, sizeof(int), 1, file) != 1 ||
+            fread(tasks[i].description, sizeof(char), MAX_TASK_DESC, file) != MAX_TASK_DESC ||
+            fread(&tasks[i].completed, sizeof(int), 1, file) != 1 ||
+            fread(&tasks[i].created_time, sizeof(time_t), 1, file) != 1 ||
+            fread(&tasks[i].modified_time, sizeof(time_t), 1, file) != 1) {
+            
+            printf("Error: Failed to read task %d from database.\n", i+1);
+            fclose(file);
+            return 0;
+        }
+    }
+    
     fclose(file);
     return 1;
 }
@@ -193,8 +274,14 @@ void list_tasks() {
 }
 
 void show_task_history(int id) {
+    if (!git_support_enabled) {
+        printf("Git is not available. Cannot show task history.\n");
+        return;
+    }
+    
     char cmd[512];
-    sprintf(cmd, "git log --pretty=format:\"%%h %%ad %%s\" --date=short --grep=\"task %d\" | cat", id);
+    // Use 'type' instead of 'cat' on Windows, and fix pipe output
+    sprintf(cmd, "git log --pretty=format:\"%%h %%ad %%s\" --date=short --grep=\"task %d\"", id);
     printf("History for Task %d:\n", id);
     system(cmd);
     printf("\n");
@@ -216,7 +303,7 @@ int main() {
     char command[512];
     int id;
     
-    printf("Task Manager v1.0\n");
+    printf("Task Manager v1.0 (DB Edition)\n");
     
     init_git_repo();
     load_tasks();

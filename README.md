@@ -8,6 +8,7 @@ A command-line task management tool written in C that allows users to add, edit,
 - List all tasks with their status
 - Automatic Git integration for version control
 - View task history (all changes made to a specific task)
+- Efficient database-style storage in .db file
 
 ## Requirements
 
@@ -82,7 +83,18 @@ Task 1 deleted.
 
 ## Data Storage
 
-The tasks are stored in a binary file named `tasks.dat` in the same directory as the executable. Each modification to the tasks list is committed to Git with an appropriate message.
+The tasks are stored in a binary database file named `tasks.db` in the same directory as the executable. Each modification to the tasks is committed to Git with an appropriate message.
+
+### Database Format
+
+The database file uses a simple binary format:
+- Header: 4-byte integer indicating the number of tasks
+- For each task:
+  - 4 bytes: task ID
+  - 256 bytes: description (fixed-length, null-padded)
+  - 4 bytes: completed flag (0 or 1)
+  - 8 bytes: creation timestamp
+  - 8 bytes: last modified timestamp
 
 ## License
 

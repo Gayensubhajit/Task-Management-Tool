@@ -2,6 +2,9 @@
 
 A command-line task management tool written in C that allows users to add, edit, complete, and delete tasks. The tool includes version control using Git to track task changes and provide task history.
 
+## created 
+created by subhajit
+
 ## Features
 
 - Add, edit, complete, and delete tasks

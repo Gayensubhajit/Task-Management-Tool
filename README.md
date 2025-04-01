@@ -15,7 +15,7 @@ Also contrubuted Chirantan Biswas , Gunjan Basak
 - List all tasks with their status
 - Automatic Git integration for version control
 - View task history (all changes made to a specific task)
-- Efficient database-style storage in .db file
+- Custom binary file storage system (not a standard database)
 - Standalone database viewer tool
 
 ## Included Files
@@ -84,8 +84,8 @@ Task added with ID: 2
 > list
 ID   Description                                        Status     Last Modified        
 ------------------------------------------------------------------------------------
-1    Complete the project proposal                       Pending    2023-08-10 15:30:45
-2    Research new technologies                           Pending    2023-08-10 15:31:02
+1    Complete the project proposal                       Pending    2025-02-10 15:30:45
+2    Research new technologies                           Pending    2025-02-10 15:31:02
 
 > complete 1
 Task 1 marked as completed.
@@ -96,8 +96,8 @@ Task 2 updated.
 > list
 ID   Description                                        Status     Last Modified        
 ------------------------------------------------------------------------------------
-1    Complete the project proposal                       Completed  2023-08-10 15:32:10
-2    Research new technologies for upcoming project      Pending    2023-08-10 15:32:45
+1    Complete the project proposal                       Completed  2025-02-10 15:32:10
+2    Research new technologies for upcoming project      Pending    2025-02-10 15:32:45
 
 > history 2
 History for Task 2:
@@ -125,11 +125,11 @@ This will display all tasks in the database in a tabular format, showing:
 
 ## Data Storage
 
-The tasks are stored in a binary database file named `tasks.db` in the same directory as the executable. Each modification to the tasks is committed to Git with an appropriate message.
+The tasks are stored in a custom binary file named `tasks.db` in the same directory as the executable. This is not a standard database system like SQLite or MySQL, but rather a custom binary format designed specifically for this application. Each modification to the tasks is committed to Git with an appropriate message for version control.
 
 ### Database Format
 
-The database file uses a simple binary format:
+The `tasks.db` file uses a simple custom binary format:
 - Header: 4-byte integer indicating the number of tasks
 - For each task:
   - 4 bytes: task ID
@@ -137,6 +137,8 @@ The database file uses a simple binary format:
   - 4 bytes: completed flag (0 or 1)
   - 8 bytes: creation timestamp
   - 8 bytes: last modified timestamp
+
+Note: The file is not compatible with standard database management systems and requires the included viewer tool (`view_binary_db`) to inspect its contents outside the main application.
 
 ## Sharing and Distribution
 
@@ -148,4 +150,4 @@ When sharing this project with others:
 
 ## License
 
-This project is open source and available under the MIT License. 
+This project is open source and available under the MIT License.

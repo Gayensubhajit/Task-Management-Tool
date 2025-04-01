@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <direct.h> // For _getcwd on Windows
+#include <direct.h> 
 
 #define MAX_TASK_DESC 256
 #define MAX_TASKS 100
@@ -12,7 +12,7 @@
 
 // Custom strdup implementation
 char* my_strdup(const char* str) {
-    size_t len = strlen(str) + 1;  // +1 for the null terminator
+    size_t len = strlen(str) + 1;
     char* new_str = malloc(len);
     if (new_str) {
         memcpy(new_str, str, len);

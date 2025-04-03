@@ -6,7 +6,7 @@ A command-line task management tool written in C that allows users to add, edit,
 Created by: Subhajit Gayen
 Student Developer
 Contact: subhajitgayen43@gmail.com
-GitHub: https://github.com/silentbyte1
+GitHub: https://github.com/Gayensubhajit
 Also contrubuted Chirantan Biswas , Gunjan Basak
 
 ## Features

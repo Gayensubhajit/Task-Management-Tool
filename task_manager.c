@@ -3,7 +3,11 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <direct.h> 
+
+#ifdef _WIN32
+    #include <direct.h>
+    #define getcwd _getcwd
+#endif
 
 #define MAX_TASK_DESC 256
 #define MAX_TASKS 100
@@ -35,10 +39,16 @@ int task_count = 0;
 int git_support_enabled = 0;
 
 int check_git_available() {
-    // Just try using the git command directly - it will work if git is in the PATH
+    // Use the appropriate null device based on platform
+#ifdef _WIN32
     if (system("git --version >nul 2>&1") == 0) {
         return 1;
     }
+#else
+    if (system("git --version >/dev/null 2>&1") == 0) {
+        return 1;
+    }
+#endif
     return 0;
 }
 
@@ -53,7 +63,7 @@ void init_git_repo() {
     
     // Configure git to allow safe directory - do this first
     char cwd[512];
-    _getcwd(cwd, sizeof(cwd));
+    getcwd(cwd, sizeof(cwd));
     char config_cmd[512];
     sprintf(config_cmd, "git config --global --add safe.directory \"%s\"", cwd);
     system(config_cmd);
